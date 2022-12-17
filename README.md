@@ -1,5 +1,8 @@
-# Tutorial: Video Recording and Replay with Flutter
+A Simple Flutter plugin for iOS, Android allowing access to the device cameras.
 
-This tutorial is available on **bettercoding.dev**:
-[https://bettercoding.dev/flutter/tutorial-video-recording-and-replay](https://bettercoding.dev/flutter/tutorial-video-recording-and-replay)
-# camera_plus
+Android	iOS	Web
+Support	SDK 21+	iOS 10+*	See camera_web
+Features
+
+Display live camera preview in a widget.
+Record video.
