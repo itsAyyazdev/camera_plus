@@ -30,7 +30,9 @@ class _VideoPageState extends State<VideoPage> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Preview'),
         elevation: 0,
@@ -45,15 +47,22 @@ class _VideoPageState extends State<VideoPage> {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: FutureBuilder(
-        future: _initVideoPlayer(),
-        builder: (context, state) {
-          if (state.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            return VideoPlayer(_videoPlayerController);
-          }
-        },
+      body: SafeArea(
+        child: FutureBuilder(
+          future: _initVideoPlayer(),
+          builder: (context, state) {
+            if (state.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              return VideoPlayer(_videoPlayerController);
+            }
+          },
+        ),
+      ),
+      bottomNavigationBar: Container(
+        height: 40,
+        width: double.infinity,
+        color: Colors.black,
       ),
     );
   }

@@ -252,7 +252,9 @@ class _CameraPageState extends State<CameraPage> {
                               allowedTimeInSeconds: allowedTimeInSeconds,
                               onEnd: () {
                                 log("Recording ended::::");
-                                _recordVideo();
+                                if (!_isRecording) {
+                                  _recordVideo();
+                                }
                               }),
                         const SizedBox(
                           height: 16,
