@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ProgressWrapper extends StatelessWidget {
-  double? progress;
-  ProgressWrapper({Key? key, this.progress}) : super(key: key);
+  final double? progress;
+  const ProgressWrapper({Key? key, this.progress}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

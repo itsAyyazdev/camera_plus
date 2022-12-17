@@ -1,13 +1,14 @@
+import 'dart:developer';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
-import 'package:camera_plus/progress_wrapper.dart';
-import 'package:camera_plus/video_page.dart';
+
+import 'library.dart';
 
 class CameraPage extends StatefulWidget {
-  int? allowedTimeInMinutes;
-  CameraPage({Key? key, this.allowedTimeInMinutes}) : super(key: key);
+  final int? allowedTimeInSeconds;
+  const CameraPage({Key? key, this.allowedTimeInSeconds}) : super(key: key);
 
   @override
   _CameraPageState createState() => _CameraPageState();
@@ -22,16 +23,17 @@ class _CameraPageState extends State<CameraPage> {
   double? _minAvailableZoom;
   CameraDescription? currentCamera;
   late CountdownTimerController _timerController;
-  int allowedTimeInMinutes = 2;
-  double loaderValue = 0;
+  int allowedTimeInSeconds = 120;
+  double progressValue = 0;
   @override
   void initState() {
-    if (widget.allowedTimeInMinutes != null) {
-      allowedTimeInMinutes = widget.allowedTimeInMinutes!;
+    if (widget.allowedTimeInSeconds != null) {
+      allowedTimeInSeconds = widget.allowedTimeInSeconds!;
     }
+
     _timerController = CountdownTimerController(
       endTime: DateTime.now()
-          .add(Duration(minutes: allowedTimeInMinutes))
+          .add(Duration(seconds: allowedTimeInSeconds))
           .millisecondsSinceEpoch,
     );
     _initCamera();
@@ -41,23 +43,26 @@ class _CameraPageState extends State<CameraPage> {
   void startTimer() {
     _timerController = CountdownTimerController(
       endTime: DateTime.now()
-          .add(Duration(minutes: allowedTimeInMinutes))
+          .add(Duration(seconds: allowedTimeInSeconds))
           .millisecondsSinceEpoch,
     );
     _timerController.start();
-    int allowedMilliSeconds = (allowedTimeInMinutes * 60) * 1000;
+    int allowedMilliSeconds = allowedTimeInSeconds * 1000;
     _timerController.addListener(() {
-      var secFromMin = (_timerController.currentRemainingTime!.min ?? 0) * 60;
-      var sec = _timerController.currentRemainingTime!.sec!;
+      var secFromMin = (_timerController.currentRemainingTime?.min ?? 0) * 60;
+      var sec = _timerController.currentRemainingTime?.sec! ?? 0;
       var totalSec = (secFromMin + sec) * 1000;
-      print(totalSec);
-      print((totalSec / allowedMilliSeconds));
-      loaderValue = 1 - (totalSec / allowedMilliSeconds);
+      debugPrint(totalSec.toString());
+      debugPrint((totalSec / allowedMilliSeconds).toString());
+      progressValue = 1 - (totalSec / allowedMilliSeconds);
       setState(() {});
     });
   }
 
   void stopTimer() {
+    if (_timerController != null) {
+      _timerController.removeListener(() {});
+    }
     if (_timerController.isRunning) {
       _timerController.dispose();
     }
@@ -149,14 +154,14 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   showInSnackBar(m) {
-    print(m);
+    debugPrint(m.toString());
   }
 
   _initCamera() async {
     cameras = await availableCameras();
     final front = cameras.firstWhere(
         (camera) => camera.lensDirection == CameraLensDirection.front);
-    _cameraController = CameraController(front, ResolutionPreset.max);
+    _cameraController = CameraController(front, ResolutionPreset.high);
     await _cameraController!.initialize();
     currentCamera = front;
     setState(() => _isLoading = false);
@@ -198,13 +203,14 @@ class _CameraPageState extends State<CameraPage> {
     try {
       await _cameraController!.setFlashMode(mode);
     } on CameraException catch (e) {
-      print(e);
+      appLogger(e.toString());
       rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     if (_isLoading) {
       return Container(
         color: Colors.white,
@@ -213,101 +219,104 @@ class _CameraPageState extends State<CameraPage> {
         ),
       );
     } else {
-      return Scaffold(
-        body: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            CameraPreview(_cameraController!),
-            Padding(
-              padding: const EdgeInsets.all(25),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (_isRecording)
-                    CountdownTimer(
-                      controller: _timerController,
-                      widgetBuilder: (context, crt) {
-                        if (crt != null) {
-                          return Text(
-                            "${crt.min ?? "00"}:${crt.sec ?? "0"}",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w300,
-                                shadows: [
-                                  BoxShadow(
-                                      color: Colors.black54.withOpacity(0.6)),
-                                  BoxShadow(
-                                      color: Colors.black54.withOpacity(0.6))
-                                ]),
-                          );
-                        } else {
-                          return SizedBox();
-                        }
-                      },
-                      onEnd: () {
-                        stopTimer();
-                      },
-                    ),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _isRecording ? SizedBox() : _flashModeControlRowWidget(),
-                      SizedBox(
-                        height: 64,
-                        width: 64,
-                        child: Stack(
+      return SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            elevation: 0,
+          ),
+          backgroundColor: Colors.black,
+          body: SizedBox(
+            height: size.height,
+            width: size.width,
+            child: Stack(
+              // alignment: Alignment.bottomCenter,
+              children: [
+                ClipRRect(
+                    child: SizedOverflowBox(
+                        size: Size(size.width, size.height / 1.2),
+                        child: CameraPreview(_cameraController!))),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 32,
+                  child: Padding(
+                    padding: const EdgeInsets.all(25),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (_timerController.isRunning)
+                          MyCountDown(
+                              allowedTimeInSeconds: allowedTimeInSeconds,
+                              onEnd: () {
+                                log("Recording ended::::");
+                                _recordVideo();
+                              }),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            ProgressWrapper(
-                              progress: loaderValue,
-                            ),
-                            Center(
-                              child: FloatingActionButton(
-                                backgroundColor: Colors.red,
-                                child: Icon(
-                                    _isRecording ? Icons.stop : Icons.circle),
-                                onPressed: () => _recordVideo(),
+                            _isRecording
+                                ? const SizedBox()
+                                : _flashModeControlRowWidget(),
+                            SizedBox(
+                              height: 64,
+                              width: 64,
+                              child: Stack(
+                                children: [
+                                  ProgressWrapper(
+                                    progress: progressValue,
+                                  ),
+                                  Center(
+                                    child: FloatingActionButton(
+                                      backgroundColor: Colors.red,
+                                      child: Icon(_isRecording
+                                          ? Icons.stop
+                                          : Icons.circle),
+                                      onPressed: () => _recordVideo(),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            _isRecording
+                                ? const SizedBox()
+                                : IconButton(
+                                    onPressed: () {
+                                      var back = cameras
+                                          .where((element) =>
+                                              element.lensDirection ==
+                                              CameraLensDirection.back)
+                                          .first;
+                                      var front = cameras
+                                          .where((element) =>
+                                              element.lensDirection ==
+                                              CameraLensDirection.front)
+                                          .first;
+
+                                      if (currentCamera == front) {
+                                        onNewCameraSelected(back);
+                                      } else {
+                                        onNewCameraSelected(front);
+                                      }
+                                    },
+                                    icon: const Icon(
+                                      Icons.cameraswitch_outlined,
+                                      color: Colors.white,
+                                    )),
                           ],
                         ),
-                      ),
-                      _isRecording
-                          ? SizedBox()
-                          : IconButton(
-                              onPressed: () {
-                                var back = cameras
-                                    .where((element) =>
-                                        element.lensDirection ==
-                                        CameraLensDirection.back)
-                                    .first;
-                                var front = cameras
-                                    .where((element) =>
-                                        element.lensDirection ==
-                                        CameraLensDirection.front)
-                                    .first;
-
-                                if (currentCamera == front) {
-                                  onNewCameraSelected(back);
-                                } else {
-                                  onNewCameraSelected(front);
-                                }
-                              },
-                              icon: Icon(
-                                Icons.cameraswitch_outlined,
-                                color: Colors.white,
-                              )),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                )
+              ],
             ),
-          ],
+          ),
         ),
       );
     }

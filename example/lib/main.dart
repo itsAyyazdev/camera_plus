@@ -1,4 +1,5 @@
 import 'package:camera_plus/camera_plus.dart';
+import 'package:camera_plus/library.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -85,13 +86,14 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             TextButton(
                 onPressed: () {
-                  CameraPlus.startCamera(context, onComplete: (v) {
+                  CameraPlus.startCamera(context, allowedVideoTimeInSeconds: 20,
+                      onComplete: (v) {
                     if (v != null) {
-                      print("File Path: ${v.path}");
+                      appLogger("File Path: ${v.path}");
                     }
                   });
                 },
-                child: Text("Start Camera")),
+                child: const Text("Start Camera")),
           ],
         ),
       ),
