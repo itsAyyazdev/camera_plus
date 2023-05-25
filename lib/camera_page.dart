@@ -70,7 +70,9 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   void dispose() {
+    if(_cameraController!=null){
     _cameraController!.dispose();
+    }
     super.dispose();
   }
 
