@@ -37,9 +37,21 @@ class _VideoPageState extends State<VideoPage> {
         title: const Text('Preview'),
         elevation: 0,
         backgroundColor: Colors.black26,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.chevron_left_outlined,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check),
+            icon: const Icon(
+              Icons.check,
+              color: Colors.white,
+            ),
             onPressed: () {
               Navigator.pop(context, File(widget.filePath));
             },

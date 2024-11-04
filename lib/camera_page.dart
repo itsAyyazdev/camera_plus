@@ -25,6 +25,7 @@ class _CameraPageState extends State<CameraPage> {
   late CountdownTimerController _timerController;
   int allowedTimeInSeconds = 120;
   double progressValue = 0;
+
   @override
   void initState() {
     if (widget.allowedTimeInSeconds != null) {
@@ -79,11 +80,6 @@ class _CameraPageState extends State<CameraPage> {
   Future<void> onNewCameraSelected(CameraDescription cameraDescription) async {
     final CameraController? oldController = _cameraController;
     if (oldController != null) {
-      // `controller` needs to be set to null before getting disposed,
-      // to avoid a race condition when we use the controller that is being
-      // disposed. This happens when camera permission dialog shows up,
-      // which triggers `didChangeAppLifecycleState`, which disposes and
-      // re-creates the controller.
       _cameraController = null;
       await oldController.dispose();
     }
@@ -99,7 +95,7 @@ class _CameraPageState extends State<CameraPage> {
     setState(() {
       currentCamera = cameraDescription;
     });
-    // If the controller is updated then update the UI.
+
     cameraController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -125,27 +121,22 @@ class _CameraPageState extends State<CameraPage> {
           showInSnackBar('You have denied camera access.');
           break;
         case 'CameraAccessDeniedWithoutPrompt':
-          // iOS only
           showInSnackBar('Please go to Settings app to enable camera access.');
           break;
         case 'CameraAccessRestricted':
-          // iOS only
           showInSnackBar('Camera access is restricted.');
           break;
         case 'AudioAccessDenied':
           showInSnackBar('You have denied audio access.');
           break;
         case 'AudioAccessDeniedWithoutPrompt':
-          // iOS only
           showInSnackBar('Please go to Settings app to enable audio access.');
           break;
         case 'AudioAccessRestricted':
-          // iOS only
           showInSnackBar('Audio access is restricted.');
           break;
         default:
-          showInSnackBar('An unknown error occurred');
-
+          showInSnackBar(e.toString());
           break;
       }
     }
@@ -155,8 +146,8 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
-  showInSnackBar(m) {
-    debugPrint(m.toString());
+  void showInSnackBar(String message) {
+    debugPrint(message);
   }
 
   _initCamera() async {
@@ -205,7 +196,7 @@ class _CameraPageState extends State<CameraPage> {
     try {
       await _cameraController!.setFlashMode(mode);
     } on CameraException catch (e) {
-      appLogger(e.toString());
+      showInSnackBar(e.toString());
       rethrow;
     }
   }
@@ -232,7 +223,6 @@ class _CameraPageState extends State<CameraPage> {
             height: size.height,
             width: size.width,
             child: Stack(
-              // alignment: Alignment.bottomCenter,
               children: [
                 ClipRRect(
                     child: SizedOverflowBox(
@@ -327,7 +317,6 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Widget _flashModeControlRowWidget() {
-    // onSetFlashModeButtonPressed(FlashMode.always);
     var color = Colors.white;
     return ClipRect(
       child: Row(
