@@ -70,8 +70,8 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   void dispose() {
-    if(_cameraController!=null){
-    _cameraController!.dispose();
+    if (_cameraController != null) {
+      _cameraController!.dispose();
     }
     super.dispose();
   }
@@ -105,8 +105,7 @@ class _CameraPageState extends State<CameraPage> {
         setState(() {});
       }
       if (cameraController.value.hasError) {
-        showInSnackBar(
-            'Camera error ${cameraController.value.errorDescription}');
+        showInSnackBar('An unknown error occurred');
       }
     });
 
@@ -145,7 +144,8 @@ class _CameraPageState extends State<CameraPage> {
           showInSnackBar('Audio access is restricted.');
           break;
         default:
-          showInSnackBar(e);
+          showInSnackBar('An unknown error occurred');
+
           break;
       }
     }
