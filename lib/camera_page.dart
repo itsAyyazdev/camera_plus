@@ -136,9 +136,11 @@ class _CameraPageState extends State<CameraPage> {
           showInSnackBar('Audio access is restricted.');
           break;
         default:
-          showInSnackBar(e.toString());
+          showInSnackBar(e.description.toString());
           break;
       }
+    } catch (e) {
+      showInSnackBar(e.toString());
     }
 
     if (mounted) {
