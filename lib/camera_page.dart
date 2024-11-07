@@ -223,6 +223,7 @@ class _CameraPageState extends State<CameraPage> {
               icon: const Icon(
                 Icons.chevron_left_rounded,
                 color: Colors.white,
+                size: 40,
               ),
               onPressed: () {
                 Navigator.pop(context);

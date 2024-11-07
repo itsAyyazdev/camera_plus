@@ -39,8 +39,9 @@ class _VideoPageState extends State<VideoPage> {
         backgroundColor: Colors.black26,
         leading: IconButton(
           icon: const Icon(
-            Icons.chevron_left_outlined,
+            Icons.chevron_left_rounded,
             color: Colors.white,
+            size: 40,
           ),
           onPressed: () {
             Navigator.pop(context);
