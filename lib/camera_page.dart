@@ -219,6 +219,15 @@ class _CameraPageState extends State<CameraPage> {
           appBar: AppBar(
             backgroundColor: Colors.black,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.chevron_left_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ),
           backgroundColor: Colors.black,
           body: SizedBox(
@@ -269,7 +278,7 @@ class _CameraPageState extends State<CameraPage> {
                                   ),
                                   Center(
                                     child: FloatingActionButton(
-                                      backgroundColor: Colors.red,
+                                      backgroundColor: Colors.white,
                                       child: Icon(_isRecording
                                           ? Icons.stop
                                           : Icons.circle),
